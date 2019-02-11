@@ -1,0 +1,22 @@
+[MASTER]
+
+# We have to turn off the no-name-in-module warning because of how Qt
+# installs itself into the the Qt packages; PyLint doesn't know
+# anything about this, and so it produces a plethora of warnings.
+# too-few-public-methods is disabled as it ignores the public methods
+# of the parent class due to a pylint bug
+# duplicate-code mostly highlights code in multiple plug-ins that may not co-exist
+# in a real application
+disable=no-name-in-module,import-error,too-few-public-methods,duplicate-code
+
+extension-pkg-whitelist=PySide.QtGui,Qt.QtWidgets,Qt.QtCore,Qt.QtGui,lxml.etree,lxml.objectify
+
+# Five args, which is the default, is a little restrictive.
+max-args=7
+
+# Seven parents is also way too restrictive.
+max-parents=10
+
+[TYPECHECK]
+# PurePath methods can't be found by lint so hide warnings just on this base class
+ignored-classes=PurePath
