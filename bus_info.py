@@ -19,26 +19,7 @@ def update_info():
     Get the 
     """
     html = urlopen(URL)
-
     soup = BeautifulSoup(html, 'lxml')
-    #type(soup)
-
-    # Get the title
-    #title = soup.title
-    #print(title)
-
-    # Print out the text
-    # text = soup.get_text()
-
-    # soup.find_all('a')
-
-    # Print the first 10 rows for sanity check
-    #for row in soup.find_all('tr'):
-    #    row_td = row.find_all('td')
-
-    #str_cells = str(row_td)
-    #cleantext = BeautifulSoup(str_cells, "lxml").get_text()
-    #print(cleantext)
 
     for row in soup.find_all('tr'): #[:NUMBER_OF_BUSES]:
         bus = ' '.join(row.stripped_strings)
