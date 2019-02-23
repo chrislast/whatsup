@@ -7,6 +7,8 @@ Inky WHAT info console for Raspberry Pi
 # pip install bs4
 # pip install lxml
 # pip install einky
+# pip install pillow
+# sudo apt-get install python3-smbus
 
 # crontab
 minute(0-59) hour(0-23) day(1-31) month(1-12) weekday(0-6) command
