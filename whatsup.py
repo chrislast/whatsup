@@ -1,11 +1,11 @@
 """Display useful info on an e-ink display"""
 import re
 from urllib.request import urlopen
-#import pandas as pd
 from bs4 import BeautifulSoup
 from PIL import Image, ImageFont, ImageDraw
 from font_hanken_grotesk import HankenGroteskBold, HankenGroteskMedium
 from font_intuitive import Intuitive
+import json
 
 from inky import InkyWHAT
 
@@ -43,6 +43,11 @@ def get_background(background_img):
 
     return img
 
+def show_text(img, txt, x, y, alignment="left", colour=inky_display.BLACK, font=HankenGroteskBold, font_size=16):
+    # Calculate the positioning and draw the text
+    font = ImageFont.truetype(font, font_size)
+    text_w, text_h = font.getsize(txt)
+    draw.text((x, y), txt, colour, font=font)
 
 def update_buses(img):
     URL = "https://bustimes.org/stops/0500SCAMB024"
@@ -54,27 +59,26 @@ def update_buses(img):
     for row, text in enumerate(soup.find_all('tr')[:NUMBER_OF_BUSES]):
         bus = ' '.join(text.stripped_strings)
         bus = re.sub("⚡", '*', bus)
-
-        # Calculate the positioning and draw the "my name is" text
-        hanken_medium_font = ImageFont.truetype(HankenGroteskBold, 16)
-        mynameis_w, mynameis_h = hanken_medium_font.getsize(bus)
-        mynameis_x = 10
-        mynameis_y = 100 + row * 14
-        draw.text((mynameis_x, mynameis_y), bus, inky_display.BLACK, font=hanken_medium_font)
+        show_text(img, bus, 10, 100 + 15 * row)
 
 def update_bins(img):
-    URL = "https://www.scambs.gov.uk/bins/find-your-bin-collection-day/#id=144154"
-    html = urlopen(URL)
-    soup = BeautifulSoup(html, "html.parser")
-
-
     URL="https://refusecalendarapi.azurewebsites.net/collection/search/144154/?numberOfCollections=3"
     html = urlopen(URL)
     if html.code != 200:
-	return
+    	return
     data = json.loads(html.read().decode())
-
-
+    collection_day = dict(DOMESTIC="Error", ORGANIC="Error", RECYCLE="Error")
+    for event in reversed(data["collections"]):
+        date = dateutil.parser.parse(event.date)
+        days = dict(0="Mon", 1="Tue", 2="Wed", 3="Thu", 4="Fri", 5="Sat", 6="Sun")
+        months = dict(1="Jan", 2="Feb", 3="Mar", 4="Apr", 5="May", 6="Jun",
+                      7="Jul", 8="Aug", 9="Sep", 10="Oct", 11="Nov", 12="Dec")
+        txt = "%s %d %s %d" % (days[date.weekday], date.day, months[date.month], date.year[-2:])
+        for round_type in event["roundTypes"]:
+            collection_day[round_type] = txt
+    show_text(img, "BLK %s" % collection_day["DOMESTIC"], 50, 200)
+    show_text(img, "BLU %s" % collection_day["RECYCLE"], 50, 200)
+    show_text(img, "GRN %s" % collection_day["ORGANIC"], 50, 200)
 
 
 def update_news(img):
