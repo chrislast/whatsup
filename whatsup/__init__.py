@@ -6,6 +6,7 @@ import json
 from urllib.request import urlopen
 import datetime
 from collections import namedtuple
+from pathlib import Path
 
 # External packages
 import dateutil.parser
@@ -17,8 +18,8 @@ from bs4 import BeautifulSoup
 from inky import InkyWHAT
 
 # Local Packages
-from customize import BIRTHDAYS, BUS_TIMES_URL, BACKGROUND
-from customize import WEATHER_URL, NEWS_URL, BINS_URL
+from .customize import BIRTHDAYS, BUS_TIMES_URL, BACKGROUND
+from .customize import WEATHER_URL, NEWS_URL, BINS_URL
 
 WEEKDAY = {
     0:"Monday", 1:"Tuesday", 2:"Wednesday", 3:"Thursday", 4:"Friday", 5:"Saturday", 6:"Sunday"}
@@ -74,6 +75,7 @@ WEATHER_ICONS={
     "Partly Cloudy" : [PARTLY_CLOUDY_DAY, PARTLY_CLOUDY_NIGHT],
     "Light Cloud" : [LIGHT_CLOUD],
     "Heavy Cloud" : [HEAVY_CLOUD],
+    "Thick Cloud" : [HEAVY_CLOUD],
 
     "Light Rain Showers" : [PARTLY_SHOWERS_DAY, PARTLY_SHOWERS_NIGHT],
     "Light Rain" : [LIGHT_RAIN],
@@ -195,13 +197,14 @@ def update_weather():
     _mn = summary_report["minTempC"] # int
     _mx = summary_report["maxTempC"] # int
     _wt = now_report["weatherTypeText"] # str
+    print("*** %s ****" % _wt)
 
     # Show the weather icon
-    weather = Image.open("weather.png", "r")
+    weather = Image.open(Path(__file__).parent / "weather.png", "r")
     if is_night:
-        icon_xy = WEATHER_ICONS.get(_wt, UNKNOWN)[-1]
+        icon_xy = WEATHER_ICONS.get(_wt, (UNKNOWN, UNKNOWN))[-1]
     else:
-        icon_xy = WEATHER_ICONS.get(_wt, UNKNOWN)[0]
+        icon_xy = WEATHER_ICONS.get(_wt, (UNKNOWN, UNKNOWN))[0]
     weather = weather.crop(icon_xy)
     centred = 157 + 50 - (icon_xy.x2-icon_xy.x1) // 2
     img.paste(weather, (centred, 100)) # 157-257, 100-156
@@ -240,7 +243,7 @@ def update_weather():
 
     # Write the days of the week on X axis of rainfall graph
     wkday = TODAY.weekday()
-    wkimg = Image.open("fortnight2.png") # 20 * 6px x 7px
+    wkimg = Image.open(Path(__file__).parent / "fortnight2.png") # 20 * 6px x 7px
     # Crop the correct 14 days from the 20 in the image
     wkimg = wkimg.crop((wkday*6, 0, (wkday+14)*6, 8))
     img.paste(wkimg, (315, 223))
@@ -266,13 +269,13 @@ def main():
 
     # Display the final image on Inky wHAT
     inky_display.set_image(img)
+    img.save(Path(__file__).parent.parent / "html" / "whatsup.png","PNG")
     inky_display.show()
+
+inky_display = InkyWHAT('red')
+inky_display.set_border(inky_display.BLACK)
+img = get_background()
 
 if __name__ == "__main__":
     # Set up the inky wHAT display and border colour
-    inky_display = InkyWHAT('red')
-    inky_display.set_border(inky_display.BLACK)
-
-    img = get_background()
-
     main()

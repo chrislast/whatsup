@@ -1,3 +1,5 @@
+from pathlib import Path
+
 BIRTHDAYS = {
     (6, 12): "Kati",
     (19, 9): "Chris",
@@ -12,4 +14,4 @@ NEWS_URL = "http://feeds.bbci.co.uk/news/rss.xml?edition=uk"
 
 WEATHER_URL = "https://weather-broker-cdn.api.bbci.co.uk/en/forecast/aggregated/9409226"
 
-BACKGROUND = "/home/pi/git/whatsup/whatsupbg.png"
+BACKGROUND = Path(__file__).parent / "whatsupbg.png"
